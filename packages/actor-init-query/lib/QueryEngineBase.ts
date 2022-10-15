@@ -18,24 +18,24 @@ import { MemoryPhysicalQueryPlanLogger } from './MemoryPhysicalQueryPlanLogger';
 /**
  * Base implementation of a Comunica query engine.
  */
-export class QueryEngineBase<QueryContext extends IQueryContextCommon = IQueryContextCommon> implements IQueryEngine {
+export class QueryEngineBase<QueryContext extends IQueryContextCommon = IQueryContextCommon>
+implements IQueryEngine<QueryContext> {
   private readonly actorInitQuery: ActorInitQueryBase;
 
-  /** `actorInitQuery` has a context member. Here, we should allow for custom context interfaces. */
-  public constructor(actorInitQuery: ActorInitQueryBase) {
+  public constructor(actorInitQuery: ActorInitQueryBase<QueryContext>) {
     this.actorInitQuery = actorInitQuery;
   }
 
   public async queryBindings<QueryFormatTypeInner extends QueryFormatType>(
     query: QueryFormatTypeInner,
-    context?: QueryFormatTypeInner extends string ? QueryStringContext : QueryAlgebraContext,
+    context?: QueryContext & QueryFormatTypeInner extends string ? QueryStringContext : QueryAlgebraContext,
   ): Promise<BindingsStream> {
     return this.queryOfType<QueryFormatTypeInner, IQueryBindingsEnhanced>(query, context, 'bindings');
   }
 
   public async queryQuads<QueryFormatTypeInner extends QueryFormatType>(
     query: QueryFormatTypeInner,
-    context?: QueryFormatTypeInner extends string ? QueryStringContext : QueryAlgebraContext,
+    context?: QueryContext & QueryFormatTypeInner extends string ? QueryStringContext : QueryAlgebraContext,
   ): Promise<AsyncIterator<RDF.Quad> & RDF.ResultStream<RDF.Quad>> {
     return this.queryOfType<QueryFormatTypeInner, IQueryQuadsEnhanced>(query, context, 'quads');
   }
